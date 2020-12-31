@@ -12,6 +12,7 @@ namespace analysisNum
 {
     public partial class Form1 : Form
     {
+        DataTable cart = new DataTable();//新建虚拟表
         int num1 = 0;
         int num2 = 0;
         int num3 = 0;
@@ -49,6 +50,23 @@ namespace analysisNum
         public Form1()
         {
             InitializeComponent();
+            //初始化DataTable值
+            cart.Rows.Add("单单", typeof(string));//编辑表的行的属性
+            cart.Rows.Add("单双", typeof(string));
+            cart.Rows.Add("单小", typeof(string));
+            cart.Rows.Add("单大", typeof(string));
+            cart.Rows.Add("双单", typeof(string));
+            cart.Rows.Add("双双", typeof(string));
+            cart.Rows.Add("双小", typeof(string));
+            cart.Rows.Add("双大", typeof(string));
+            cart.Rows.Add("小单", typeof(string));
+            cart.Rows.Add("小双", typeof(string));
+            cart.Rows.Add("小小", typeof(string));
+            cart.Rows.Add("小大", typeof(string));
+            cart.Rows.Add("大单", typeof(string));
+            cart.Rows.Add("大双", typeof(string));
+            cart.Rows.Add("大小", typeof(string));
+            cart.Rows.Add("大大", typeof(string));
         }
 
         public void init() {
@@ -86,6 +104,52 @@ namespace analysisNum
             periods15 = 0;
             periods16 = 0;
             show = "";
+        }
+
+        private void clear_Click(object sender, EventArgs e)
+        {
+            for (int i = cart.Rows.Count - 1; i >= 0; i--)
+            {
+                cart.Rows.RemoveAt(i);
+            }
+            dataBind();
+        }
+
+        private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (e.Item.Checked == true)
+            {
+                DataRow rr = cart.NewRow();
+                rr["名称"] = e.Item.Text.ToString();
+                rr["单价"] = e.Item.Name.ToString();
+                cart.Rows.Add(rr);//增加一条记录
+                dataBind();
+            }
+        }
+
+        public void zhuangZhi() {
+            DataTable dtLeft = new DataTable();
+            //右侧数据表，是左侧数据表的转置
+            DataTable dtRight = new DataTable();
+
+            for (int i = 0; i < dtLeft.Rows.Count; i++)
+            {
+                dtRight.Columns.Add("C" + i);
+            }
+            dtRight.Columns.Add("TIME");
+
+            for (int i = 0; i < dtLeft.Columns.Count - 1; i++)
+            {
+                object[] obj = new object[dtLeft.Rows.Count + 1];
+                for (int j = 0; j < dtLeft.Rows.Count; j++)
+                {
+                    obj[j] = dtLeft.Rows[j][i];
+                }
+                obj[obj.Length - 1] = DateTime.Now.ToShortTimeString();
+                dtRight.Rows.Add(obj);
+            }
+
+            dataGridView1.DataSource = dtRight;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -188,32 +252,27 @@ namespace analysisNum
             //// 期数的长度
             //int length = sArray.Length / 5;
             //
-
-            getString("单单", periods1);
-            getString("单双", periods2);
-            getString("单小", periods3);
-            getString("单大", periods4);
-            getString("双单", periods5);
-            getString("双单", periods6);
-            getString("双单", periods7);
-            getString("双单", periods8);
-            getString("小单", periods9);
-            getString("小单", periods10);
-            getString("小单", periods11);
-            getString("小单", periods12);
-            getString("大单", periods13);
-            getString("大单", periods14);
-            getString("大单", periods15);
-            getString("大单", periods16);
-            label1.Text = show;
-
         }
 
-        // 结果拼接
-        public string getString(string type, int num)
+        public void dataBind()
         {
-            show += type + ":" + num + "次\n";
-            return show;
+            double sum = 0;
+            string content = "";
+            dataGridView1.DataSource = cart;
+            if (dataGridView1.Rows.Count > 1)
+            {
+                for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
+                {
+                    try
+                    {
+                        dataGridView1.SelectedCells[i].ReadOnly = true;
+                    }
+                    catch { }
+                    sum = sum + (double.Parse(dataGridView1.Rows[i].Cells["单价"].Value.ToString()));
+                    content = content + "；" + dataGridView1.Rows[i].Cells["名称"].Value.ToString();
+                }
+            }
+
         }
 
 
